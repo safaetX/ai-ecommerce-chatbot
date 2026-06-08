@@ -16,8 +16,14 @@ export async function GET() {
         price: 799,
         category: "t-shirt",
         image:
-          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
-        stock: 20,
+          "/products/black-tshirt.jpg",
+        stock: {
+          S: 3,
+          M: 5,
+          L: 6,
+          XL: 4,
+          XXL: 2,
+        },
       },
       {
         name: "White T-Shirt",
@@ -25,8 +31,14 @@ export async function GET() {
         price: 699,
         category: "t-shirt",
         image:
-          "https://images.unsplash.com/photo-1583743814966-8936f37f4678",
-        stock: 15,
+          "/products/white-tshirt.jpg",
+        stock: {
+          S: 2,
+          M: 4,
+          L: 5,
+          XL: 3,
+          XXL: 1,
+        },
       },
       {
         name: "Blue Jeans",
@@ -34,8 +46,14 @@ export async function GET() {
         price: 1499,
         category: "pants",
         image:
-          "https://images.unsplash.com/photo-1542272604-787c3835535d",
-        stock: 12,
+          "/products/blue-jeans.jpg",
+        stock: {
+          S: 1,
+          M: 3,
+          L: 4,
+          XL: 2,
+          XXL: 1,
+        },
       },
       {
         name: "Black Pants",
@@ -43,8 +61,14 @@ export async function GET() {
         price: 1299,
         category: "pants",
         image:
-          "https://images.unsplash.com/photo-1473966968600-fa801b869a1a",
-        stock: 18,
+          "/products/black-pants.jpg",
+        stock: {
+          S: 2,
+          M: 4,
+          L: 5,
+          XL: 4,
+          XXL: 2,
+        },
       },
     ]);
 

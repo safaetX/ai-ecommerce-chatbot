@@ -6,7 +6,13 @@ export interface IProduct extends Document {
   price: number;
   category: string;
   image: string;
-  stock: number;
+  stock: {
+    S: number;
+    M: number;
+    L: number;
+    XL: number;
+    XXL: number;
+  };
   createdAt: Date;
 }
 
@@ -38,8 +44,26 @@ const ProductSchema = new Schema<IProduct>({
   },
 
   stock: {
-    type: Number,
-    default: 0,
+    S: {
+      type: Number,
+      default: 0,
+    },
+    M: {
+      type: Number,
+      default: 0,
+    },
+    L: {
+      type: Number,
+      default: 0,
+    },
+    XL: {
+      type: Number,
+      default: 0,
+    },
+    XXL: {
+      type: Number,
+      default: 0,
+    },
   },
 
   createdAt: {
