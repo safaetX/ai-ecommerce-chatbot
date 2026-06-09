@@ -223,6 +223,38 @@ ${message}
     });
     }
 
+    if (aiResponse.intent === "checkout") {
+    const cart = await Cart.findOne({
+        userId: (session.user as any).id,
+    });
+
+    if (!cart) {
+        return NextResponse.json({
+        success: false,
+        message: "Cart not found",
+        });
+    }
+
+    if (cart.items.length === 0) {
+        return NextResponse.json({
+        success: false,
+        message: "Your cart is empty.",
+        });
+    }
+
+    cart.items = [];
+
+    await cart.save();
+
+    return NextResponse.json({
+        success: true,
+        intent: "checkout",
+        product: null,
+        size: null,
+        message: "Order placed successfully! Your cart has been cleared.",
+    });
+    }
+
     return NextResponse.json({
     success: true,
     intent: aiResponse.intent,
