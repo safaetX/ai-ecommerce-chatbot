@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import CategorySidebar from "@/components/CategorySidebar";
+import ChatWidget from "@/components/ChatWidget";
 
 interface Product {
   _id: string;
@@ -190,6 +191,7 @@ export default function ProductsPage() {
           </div>
         </div>
       </div>
+      <ChatWidget />
     </main>
   );
 }
