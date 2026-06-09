@@ -22,7 +22,7 @@ export async function GET() {
     }
 
     const cart = await Cart.findOne({
-      userId: session.user.id,
+      userId: (session.user as any).id,
     }).populate("items.productId");
 
     return NextResponse.json({

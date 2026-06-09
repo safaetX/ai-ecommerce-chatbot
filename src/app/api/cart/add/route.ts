@@ -21,12 +21,12 @@ export async function POST(req: NextRequest) {
     const { productId, size, quantity } = await req.json();
 
     let cart = await Cart.findOne({
-      userId: session.user.id,
+      userId: (session.user as any).id,
     });
 
     if (!cart) {
       cart = await Cart.create({
-        userId: session.user.id,
+        userId:(session.user as any).id,
         items: [],
       });
     }
