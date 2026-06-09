@@ -40,6 +40,35 @@ export default function CartPage() {
     setItems((prev) => prev.filter((i) => !(i.productId._id === productId && i.size === size)));
   };
 
+  const updateQuantity = async (
+  productId: string,
+  size: string,
+  quantity: number
+) => {
+  if (quantity < 1) return;
+
+  await fetch("/api/cart/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      productId,
+      size,
+      quantity,
+    }),
+  });
+
+  setItems((prev) =>
+    prev.map((item) =>
+      item.productId._id === productId &&
+      item.size === size
+        ? { ...item, quantity }
+        : item
+    )
+  );
+};
+
   const handleCheckout = async () => {
     setCheckingOut(true);
     await fetch("/api/checkout", { method: "POST" });
@@ -155,8 +184,35 @@ export default function CartPage() {
                       </div>
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center gap-2 bg-zinc-800 rounded-lg px-2 py-1">
-                          <span className="text-xs text-zinc-500">Qty</span>
-                          <span className="text-xs font-semibold text-white">{item.quantity}</span>
+                          <button
+                            onClick={() =>
+                              updateQuantity(
+                                item.productId._id,
+                                item.size,
+                                item.quantity - 1
+                              )
+                            }
+                            className="w-6 h-6 rounded bg-zinc-700 hover:bg-zinc-600 text-white text-sm"
+                          >
+                            -
+                          </button>
+
+                          <span className="text-xs font-semibold text-white min-w-[20px] text-center">
+                            {item.quantity}
+                          </span>
+
+                          <button
+                            onClick={() =>
+                              updateQuantity(
+                                item.productId._id,
+                                item.size,
+                                item.quantity + 1
+                              )
+                            }
+                            className="w-6 h-6 rounded bg-zinc-700 hover:bg-zinc-600 text-white text-sm"
+                          >
+                            +
+                          </button>
                         </div>
                         <span className="font-bold text-white text-sm">
                           ৳{(item.productId.price * item.quantity).toLocaleString()}
