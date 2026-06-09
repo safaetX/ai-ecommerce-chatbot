@@ -5,6 +5,11 @@ import Cart from "@/models/Cart";
 import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  addToCart,
+  removeFromCart,
+  checkout,
+} from "@/lib/chatActions";
 
 const genAI = new GoogleGenerativeAI(
   process.env.GEMINI_API_KEY!
@@ -135,132 +140,50 @@ ${message}
     aiResponse.product &&
     aiResponse.size
     ) {
-
-    const product = await Product.findOne({
-        name: aiResponse.product.trim(),
-    });
-
-
-    if (!product) {
-        return NextResponse.json({
-        success: false,
-        message: "Product not found",
-        });
-    }
-
-    let cart = await Cart.findOne({
-        userId: (session.user as any).id,
-    });
-
-    if (!cart) {
-        cart = await Cart.create({
-        userId: (session.user as any).id,
-        items: [],
-        });
-    }
-
-    const existingItem = cart.items.find(
-        (item: any) =>
-        item.productId.toString() === product._id.toString() &&
-        item.size === aiResponse.size
+    const result = await addToCart(
+        (session.user as any).id,
+        aiResponse.product,
+        aiResponse.size
     );
 
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.items.push({
-        productId: product._id,
-        size: aiResponse.size,
-        quantity: 1,
-        });
-    }
-
-    await cart.save();
-
     return NextResponse.json({
-        success: true,
+        success: result.success,
         intent: aiResponse.intent,
         product: aiResponse.product,
         size: aiResponse.size,
-        message: `${aiResponse.product} (${aiResponse.size}) added to cart.`,
+        message: result.message,
     });
     }
 
     if (
-        aiResponse.intent === "remove_from_cart" &&
-        aiResponse.product &&
-        aiResponse.size
+    aiResponse.intent === "remove_from_cart" &&
+    aiResponse.product &&
+    aiResponse.size
     ) {
-    const product = await Product.findOne({
-        name: aiResponse.product.trim(),
-    });
-
-    if (!product) {
-        return NextResponse.json({
-        success: false,
-        message: "Product not found",
-        });
-    }
-
-    const cart = await Cart.findOne({
-        userId: (session.user as any).id,
-    });
-
-    if (!cart) {
-        return NextResponse.json({
-        success: false,
-        message: "Cart not found",
-        });
-    }
-
-    cart.items = cart.items.filter(
-        (item: any) =>
-        !(
-            item.productId.toString() === product._id.toString() &&
-            item.size === aiResponse.size
-        )
+    const result = await removeFromCart(
+        (session.user as any).id,
+        aiResponse.product,
+        aiResponse.size
     );
 
-    await cart.save();
-
     return NextResponse.json({
-        success: true,
+        success: result.success,
         intent: aiResponse.intent,
         product: aiResponse.product,
         size: aiResponse.size,
-        message: `${aiResponse.product} (${aiResponse.size}) removed from cart.`,
+        message: result.message,
     });
     }
 
     if (aiResponse.intent === "checkout") {
-    const cart = await Cart.findOne({
-        userId: (session.user as any).id,
-    });
-
-    if (!cart) {
-        return NextResponse.json({
-        success: false,
-        message: "Cart not found",
-        });
-    }
-
-    if (cart.items.length === 0) {
-        return NextResponse.json({
-        success: false,
-        message: "Your cart is empty.",
-        });
-    }
-
-    cart.items = [];
-
-    await cart.save();
+    const result = await checkout(
+        (session.user as any).id
+    );
 
     return NextResponse.json({
-        success: true,
+        success: result.success,
         intent: "checkout",
-        product: null,
-        size: null,
-        message: "Order placed successfully! Your cart has been cleared.",
+        message: result.message,
     });
     }
 
