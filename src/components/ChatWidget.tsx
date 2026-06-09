@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
 
 interface Message {
   role: "user" | "assistant";
@@ -11,14 +12,8 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content:
-        "Hi! I'm your AI shopping assistant. Ask me about products, sizes, prices, or recommendations.",
-    },
-  ]);
+  
+  const [messages, setMessages] = useState<Message[]>([]);    
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -54,7 +49,7 @@ export default function ChatWidget() {
         {
           role: "assistant",
           content:
-            data.response ||
+            data.message ||
             "Sorry, I couldn't process your request.",
         },
       ]);
@@ -70,6 +65,31 @@ export default function ChatWidget() {
 
     setLoading(false);
   };
+
+  useEffect(() => {
+  const savedMessages = localStorage.getItem("chatMessages");
+
+  if (savedMessages) {
+    setMessages(JSON.parse(savedMessages));
+  } else {
+    setMessages([
+      {
+        role: "assistant",
+        content:
+          "Hi! I'm your AI shopping assistant. Ask me about products, sizes, prices, or recommendations.",
+      },
+    ]);
+  }
+}, []);
+
+useEffect(() => {
+  if (messages.length > 0) {
+    localStorage.setItem(
+      "chatMessages",
+      JSON.stringify(messages)
+    );
+  }
+}, [messages]);
 
   return (
     <>

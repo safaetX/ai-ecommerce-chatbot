@@ -121,10 +121,12 @@ export default function Navbar() {
               </div>
 
               <button
-                onClick={() => signOut()}
-                className="text-xs text-zinc-500 hover:text-white transition-colors"
+                onClick={() => {
+                  localStorage.removeItem("chatMessages");
+                  signOut();
+                }}
               >
-                Sign out
+                Logout
               </button>
             </div>
           ) : (
