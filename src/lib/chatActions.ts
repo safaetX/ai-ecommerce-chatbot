@@ -26,10 +26,12 @@ export async function addToCart(
     });
   }
 
+  const normalizedSize = size.toUpperCase();
+
   const existingItem = cart.items.find(
     (item: any) =>
       item.productId.toString() === product._id.toString() &&
-      item.size === size
+      item.size === normalizedSize
   );
 
   if (existingItem) {
@@ -37,7 +39,7 @@ export async function addToCart(
   } else {
     cart.items.push({
       productId: product._id,
-      size,
+       size: normalizedSize,
       quantity: 1,
     });
   }
@@ -75,11 +77,13 @@ export async function removeFromCart(
     };
   }
 
+  const normalizedSize = size.toUpperCase();
+
   cart.items = cart.items.filter(
     (item: any) =>
       !(
         item.productId.toString() === product._id.toString() &&
-        item.size === size
+        item.size === normalizedSize
       )
   );
 

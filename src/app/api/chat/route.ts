@@ -49,6 +49,17 @@ Possible intents:
 - remove_from_cart
 - checkout
 
+IMPORTANT RULES:
+
+- Always return valid JSON.
+- Never ask follow-up questions.
+- Never return conversational replies outside JSON.
+- For add_to_cart and remove_from_cart, always try to identify the exact product and size.
+- If the user does not provide enough information, set intent to "recommend".
+- If product name is missing, ask the user to provide the full product name inside the JSON message field.
+- If size is missing, ask the user to provide the size inside the JSON message field.
+- Never return partial actions.
+
 IMPORTANT:
 Return ONLY valid JSON.
 Do not use markdown.
@@ -65,6 +76,24 @@ JSON format:
 }
 
 Examples:
+
+User: remove M size tshirt from cart
+
+{
+  "intent": "recommend",
+  "product": null,
+  "size": null,
+  "message": "Please specify the exact product name, for example: Remove Black T-Shirt size M."
+}
+
+User: add tshirt to cart
+
+{
+  "intent": "recommend",
+  "product": null,
+  "size": null,
+  "message": "Please specify both product name and size."
+}
 
 User: Add Black T-Shirt size M to cart
 
@@ -198,11 +227,12 @@ ${message}
     console.error("CHAT ERROR:", error);
 
     return NextResponse.json(
-      {
+    {
         success: false,
-        message: "Failed to generate response",
-      },
-      { status: 500 }
+        message:
+        "AI service is temporarily unavailable (API quota exceeded). Please try again later.",
+    },
+    { status: 500 }
     );
   }
 }
