@@ -14,6 +14,17 @@ export async function POST(req: NextRequest) {
   try {
     const { message } = await req.json();
 
+    await connectDB();
+
+    const products = await Product.find();
+
+    const productList = products
+    .map(
+        (p) =>
+        `${p.name} (৳${p.price}) - Category: ${p.category}`
+    )
+    .join("\n");
+
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
     });
@@ -22,10 +33,8 @@ export async function POST(req: NextRequest) {
 You are an AI shopping assistant.
 
 Available products:
-- Black T-Shirt
-- White T-Shirt
-- Blue Jeans
-- Black Pants
+
+${productList}
 
 Analyze the user's message and determine the intent.
 
