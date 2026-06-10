@@ -359,14 +359,24 @@ User: Checkout
       size: aiResponse.size,
       message: aiResponse.message,
     });
-  } catch (error) {
+  }catch (error: any) {
     console.error("CHAT ERROR:", error);
+
+    let message =
+      "AI service is temporarily unavailable. Please try again later.";
+
+    if (error?.status === 429) {
+      message =
+        "AI quota exceeded. Please try again later.";
+    } else if (error?.status === 503) {
+      message =
+        "AI service is currently busy. Please try again in a moment.";
+    }
 
     return NextResponse.json(
       {
         success: false,
-        message:
-          "AI service is temporarily unavailable. Please try again later.",
+        message,
       },
       { status: 500 }
     );
