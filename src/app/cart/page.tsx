@@ -71,7 +71,7 @@ export default function CartPage() {
 
   const handleCheckout = async () => {
     setCheckingOut(true);
-    await fetch("/api/checkout", { method: "POST" });
+    await fetch("/api/cart/checkout", { method: "POST" });
     setCheckingOut(false);
     setOrderPlaced(true);
     setItems([]);
