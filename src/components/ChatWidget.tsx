@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 
 interface ProductSummary {
@@ -32,6 +32,7 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<Message[]>([]);   
   
   const { data: session } = useSession()
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -165,6 +166,16 @@ useEffect(() => {
   }
 }, [messages]);
 
+useEffect(() => {
+  if (open) {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+      });
+    }, 100);
+  }
+}, [messages, open]);
+
   return (
     <>
       {/* Floating Button */}
@@ -247,6 +258,7 @@ useEffect(() => {
                 Thinking...
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="p-3 border-t border-white/10 flex gap-2">
