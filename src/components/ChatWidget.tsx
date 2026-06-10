@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 
 interface ProductSummary {
   _id: string;
@@ -28,7 +29,9 @@ export default function ChatWidget() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   
-  const [messages, setMessages] = useState<Message[]>([]);    
+  const [messages, setMessages] = useState<Message[]>([]);   
+  
+  const { data: session } = useSession()
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -55,8 +58,22 @@ export default function ChatWidget() {
         },
         body: JSON.stringify({
           message: userMessage,
+          history: messages.slice(-8),
         }),
       });
+
+      if (session) {
+        fetch("/api/chat/history", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            role: "user",
+            content: userMessage,
+          }),
+        });
+      }
 
       const data = await res.json();
 
@@ -71,6 +88,20 @@ export default function ChatWidget() {
           products: data.products ?? [],
         },
       ]);
+      if (session) {
+        await fetch("/api/chat/history", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            role: "assistant",
+            content:
+              data.message ||
+              "Sorry, I couldn't process your request.",
+          }),
+        });
+      }
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -85,20 +116,45 @@ export default function ChatWidget() {
   };
 
   useEffect(() => {
-  const savedMessages = localStorage.getItem("chatMessages");
+    const loadHistory = async () => {
+      if (session) {
+        try {
+          const res = await fetch("/api/chat/history");
+          const data = await res.json();
 
-  if (savedMessages) {
-    setMessages(JSON.parse(savedMessages));
-  } else {
-    setMessages([
-      {
-        role: "assistant",
-        content:
-          "Hi! I'm your AI shopping assistant. Ask me about products, sizes, prices, or recommendations.",
-      },
-    ]);
-  }
-}, []);
+          if (
+            data.success &&
+            data.messages.length > 0
+          ) {
+            setMessages(
+              data.messages.map((msg: any) => ({
+                role: msg.role,
+                content: msg.content,
+              }))
+            );
+            return;
+          }
+        } catch {}
+      }
+
+      const savedMessages =
+        localStorage.getItem("chatMessages");
+
+      if (savedMessages) {
+        setMessages(JSON.parse(savedMessages));
+      } else {
+        setMessages([
+          {
+            role: "assistant",
+            content:
+              "Hi! I'm your AI shopping assistant. Ask me about products, sizes, prices, or recommendations.",
+          },
+        ]);
+      }
+    };
+
+    loadHistory();
+  }, [session]);
 
 useEffect(() => {
   if (messages.length > 0) {

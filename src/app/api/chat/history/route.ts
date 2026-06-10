@@ -41,3 +41,36 @@ export async function GET() {
     );
   }
 }
+
+export async function POST(req: Request) {
+  try {
+    await connectDB();
+
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json(
+        { success: false },
+        { status: 401 }
+      );
+    }
+
+    const { role, content } = await req.json();
+
+    const message = await Conversation.create({
+      userId: (session.user as any).id,
+      role,
+      content,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message,
+    });
+  } catch {
+    return NextResponse.json(
+      { success: false },
+      { status: 500 }
+    );
+  }
+}
