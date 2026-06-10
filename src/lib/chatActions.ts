@@ -1,5 +1,6 @@
 import Cart from "@/models/Cart";
 import Product from "@/models/Product";
+import ProductRequest from "@/models/ProductRequest";
 
 export async function addToCart(
   userId: string,
@@ -17,6 +18,28 @@ export async function addToCart(
     };
   }
 
+  const normalizedSize =
+    size.toUpperCase() as keyof typeof product.stock;
+
+  if (
+    !product.stock?.[normalizedSize] ||
+    product.stock[normalizedSize] <= 0
+  ) {
+    await ProductRequest.create({
+      userId,
+      productId: product._id,
+      size: normalizedSize,
+    });
+
+    return {
+      success: false,
+      outOfStock: true,
+      message:
+        `${product.name} size ${normalizedSize} is currently out of stock. ` +
+        `A product request has been submitted for you.`,
+    };
+  }
+
   let cart = await Cart.findOne({ userId });
 
   if (!cart) {
@@ -25,8 +48,6 @@ export async function addToCart(
       items: [],
     });
   }
-
-  const normalizedSize = size.toUpperCase();
 
   const existingItem = cart.items.find(
     (item: any) =>
