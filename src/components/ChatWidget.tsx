@@ -2,9 +2,25 @@
 
 import { useState, useEffect } from "react";
 
+interface ProductSummary {
+  _id: string;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
+  stock: {
+    S: number;
+    M: number;
+    L: number;
+    XL: number;
+    XXL: number;
+  };
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
+  products?: ProductSummary[];
 }
 
 export default function ChatWidget() {
@@ -19,6 +35,7 @@ export default function ChatWidget() {
 
     const userMessage = message;
 
+    // Add user message
     setMessages((prev) => [
       ...prev,
       {
@@ -43,6 +60,7 @@ export default function ChatWidget() {
 
       const data = await res.json();
 
+      // Add assistant message
       setMessages((prev) => [
         ...prev,
         {
@@ -50,6 +68,7 @@ export default function ChatWidget() {
           content:
             data.message ||
             "Sorry, I couldn't process your request.",
+          products: data.products ?? [],
         },
       ]);
     } catch {
@@ -112,15 +131,58 @@ useEffect(() => {
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
-                  msg.role === "user"
-                    ? "bg-white text-zinc-950 ml-auto"
-                    : "bg-zinc-800 text-white"
-                }`}
-              >
-                {msg.content}
+              <div key={index}>
+                <div
+                  className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
+                    msg.role === "user"
+                      ? "bg-white text-zinc-950 ml-auto"
+                      : "bg-zinc-800 text-white"
+                  }`}
+                >
+                  {msg.content}
+                </div>
+
+                {msg.products && msg.products.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {msg.products.map((product) => (
+                      <div
+                        key={product._id}
+                        className="bg-zinc-800 border border-white/10 rounded-xl p-3"
+                      >
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-32 object-cover rounded-lg mb-2"
+                        />
+
+                        <h3 className="text-white font-semibold">
+                          {product.name}
+                        </h3>
+
+                        <p className="text-zinc-400 text-sm">
+                          {product.category}
+                        </p>
+
+                        <p className="text-white font-bold mt-1">
+                          ৳{product.price}
+                        </p>
+
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {Object.entries(product.stock)
+                            .filter(([, qty]) => qty > 0)
+                            .map(([size]) => (
+                              <span
+                                key={size}
+                                className="text-xs px-2 py-1 rounded bg-zinc-700 text-zinc-200"
+                              >
+                                {size}
+                              </span>
+                            ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
 
