@@ -56,7 +56,10 @@ function normalizeFilters(filters: unknown): ProductSearchFilters {
 
 export async function POST(req: NextRequest) {
   try {
-    const { message } = await req.json();
+    const {
+      message,
+      history = [],
+    } = await req.json();
 
     await connectDB();
 
@@ -78,8 +81,23 @@ Stock: S=${product.stock.S}, M=${product.stock.M}, L=${product.stock.L}, XL=${pr
       model: "gemini-2.5-flash",
     });
 
+    const conversationHistory = history
+      .map(
+        (msg: { role: string; content: string }) =>
+          `${msg.role}: ${msg.content}`
+      )
+      .join("\n");
+
     const result = await model.generateContent(`
 You are an AI shopping assistant.
+
+Conversation history:
+
+${conversationHistory}
+
+Current user message:
+
+${message}
 
 Available products:
 
@@ -226,8 +244,6 @@ User: Checkout
   "message": "Proceeding to checkout."
 }
 
-User message:
-${message}
 `);
 
     let text = result.response.text().trim();
